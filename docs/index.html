@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>chrome-tab-cleaner — Inspect Chrome Tabs by Memory & CPU</title>
+  <meta name="description" content="A high-performance terminal user interface (TUI) for macOS to inspect Google Chrome tabs sorted by Memory and CPU usage, and instantly focus or close them.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=chrome-tab-cleaner"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'chrome-tab-cleaner', { send_page_view: false });
+  </script>
+  <script src="js/analytics.js" defer></script>
+
+  <style>
+    :root {
+      --bg-page: #0a0d12;
+      --bg-card: #11151c;
+      --bg-card-subtle: #161b22;
+      --border-subtle: #21262d;
+      --border-strong: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-dim: #6e7681;
+      --accent: #58a6ff;
+      --accent-hover: #388bfd;
+      --accent-glow: rgba(88, 166, 255, 0.15);
+      --success: #3fb950;
+      --warn: #d29922;
+      --code-bg: #0d1117;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 13, 18, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.85rem 1.5rem;
+    }
+    .navbar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .brand-badge {
+      font-size: 0.75rem;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-strong);
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover { color: var(--accent); text-decoration: none; }
+    .nav-btn {
+      background: var(--accent);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .nav-btn:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4.5rem 1rem 3.5rem;
+    }
+    .release-pill-wrapper {
+      margin-bottom: 1.5rem;
+    }
+    .release-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      transition: border-color 0.2s;
+    }
+    .release-pill:hover { border-color: var(--accent); text-decoration: none; }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(63, 185, 80, 0.8);
+    }
+    .hero h1 {
+      font-size: 3.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(180deg, #ffffff 0%, #c9d1d9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .quick-install-box {
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .quick-install-box code {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: #79c0ff;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+    .btn-copy {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-copy:hover {
+      background: var(--border-strong);
+      color: var(--text-main);
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+    .btn-primary:hover { background: var(--accent-hover); text-decoration: none; }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-strong);
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+
+    section {
+      padding: 4.5rem 0 2rem;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .section-subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 2rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    @media (max-width: 640px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2.4rem; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.75rem;
+      position: relative;
+    }
+
+    .install-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .install-tabs {
+      display: flex;
+      background: var(--bg-card-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+    }
+    .install-tab-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .install-tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(88, 166, 255, 0.05);
+    }
+    .install-tab-content {
+      padding: 1.75rem;
+      display: none;
+    }
+    .install-tab-content.active { display: block; }
+    .install-tab-content p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #79c0ff;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    code { font-family: var(--font-mono); }
+
+    .table-responsive {
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    th {
+      background: var(--bg-card-subtle);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 0;
+      margin-top: 5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="#" class="brand">
+        <span>🧹 chrome-tab-cleaner</span>
+        <span class="brand-badge" id="release-version">v0.1.0</span>
+      </a>
+      <div class="nav-links">
+        <a href="#install" class="nav-link">Installation</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#keybindings" class="nav-link">Keybindings</a>
+        <a href="#security" class="nav-link">DevSecOps</a>
+        <a href="https://github.com/smford/chrome-tab-cleaner" class="nav-btn" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="release-pill-wrapper">
+        <a href="https://github.com/smford/chrome-tab-cleaner/releases/tag/v0.1.0" class="release-pill" target="_blank" rel="noopener">
+          <span class="pulse-dot"></span>
+          <span>Latest Release: <strong id="release-version-number">0.1.0</strong> Available Now →</span>
+        </a>
+      </div>
+      <h1>Inspect & Tame<br>Chrome Tab Sprawl</h1>
+      <p>A high-performance terminal user interface for macOS that correlates live Chrome Task Manager memory footprints and CPU percentages with browser tabs, enabling instant navigation, focus switching, and tab closing.</p>
+
+      <div class="quick-install-box">
+        <code>brew install smford/tap/chrome-tab-cleaner</code>
+        <button class="btn-copy" data-clipboard-text="brew install smford/tap/chrome-tab-cleaner">Copy</button>
+      </div>
+
+      <div class="hero-actions">
+        <a href="#install" class="btn-primary">Installation</a>
+        <a href="#features" class="btn-secondary">Explore Features</a>
+      </div>
+    </header>
+
+    <!-- Installation Methods -->
+    <section id="install">
+      <div class="section-header">
+        <h2 class="section-title">Installation Methods</h2>
+        <p class="section-subtitle">Install via Homebrew, download signed release binaries, or build from source.</p>
+      </div>
+
+      <div class="install-container">
+        <div class="install-tabs">
+          <button class="install-tab-btn active" onclick="switchTab(event, 'tab-brew')">🍺 Homebrew</button>
+          <button class="install-tab-btn" onclick="switchTab(event, 'tab-binary')">📦 Direct Download</button>
+          <button class="install-tab-btn" onclick="switchTab(event, 'tab-go')">🐹 Go Install</button>
+          <button class="install-tab-btn" onclick="switchTab(event, 'tab-docker')">🐳 Docker</button>
+        </div>
+
+        <div id="tab-brew" class="install-tab-content active">
+          <p>Install via the official tap with automated Homebrew formula updates:</p>
+          <pre><code>brew tap smford/tap
+brew install chrome-tab-cleaner</code></pre>
+          <button class="btn-copy" data-clipboard-text="brew tap smford/tap && brew install chrome-tab-cleaner">Copy Command</button>
+        </div>
+
+        <div id="tab-binary" class="install-tab-content">
+          <p>Download pre-compiled hermetic binaries for macOS and Linux:</p>
+          <pre><code># macOS Apple Silicon (M1/M2/M3/M4)
+curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_arm64.tar.gz" | tar -xz
+sudo mv chrome-tab-cleaner /usr/local/bin/
+
+# macOS Intel
+curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_amd64.tar.gz" | tar -xz
+sudo mv chrome-tab-cleaner /usr/local/bin/</code></pre>
+        </div>
+
+        <div id="tab-go" class="install-tab-content">
+          <p>Compile and install directly with the Go toolchain:</p>
+          <pre><code>go install github.com/smford/chrome-tab-cleaner/cmd/chrome-tab-cleaner@latest</code></pre>
+        </div>
+
+        <div id="tab-docker" class="install-tab-content">
+          <p>Run the container image or healthcheck daemon via GitHub Container Registry:</p>
+          <pre><code>docker pull ghcr.io/smford/chrome-tab-cleaner:latest</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+      <div class="section-header">
+        <h2 class="section-title">Core Architecture & Capabilities</h2>
+        <p class="section-subtitle">Engineered for low latency and zero memory overhead.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">⚡ Batch Tab Enumeration</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Discovers all open windows and tabs across profiles via macOS AppleScript in a single batch query (~0.8s for 400+ tabs).</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">📊 Live Task Manager Metrics</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Reads real-time process metrics from Chrome's Task Manager via Accessibility UI APIs, matching tabs by memory footprint and CPU %.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🎯 Direct Window & Tab Raise</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Brings selected tabs and windows immediately to the foreground using native macOS AXRaise and Chrome tab indexing.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Keybindings Section -->
+    <section id="keybindings">
+      <div class="section-header">
+        <h2 class="section-title">Interactive Keybindings</h2>
+        <p class="section-subtitle">Ergonomic keyboard shortcuts for rapid navigation.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Action</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>↑</code> / <code>↓</code> or <code>k</code> / <code>j</code></td>
+              <td>Navigate</td>
+              <td>Move table selection up and down across tabs.</td>
+            </tr>
+            <tr>
+              <td><code>Enter</code></td>
+              <td>Focus Tab</td>
+              <td>Raise the target window and switch to the selected tab.</td>
+            </tr>
+            <tr>
+              <td><code>m</code></td>
+              <td>Sort by Memory</td>
+              <td>Sort all open tabs in descending order of memory usage.</td>
+            </tr>
+            <tr>
+              <td><code>c</code></td>
+              <td>Sort by CPU</td>
+              <td>Sort all open tabs in descending order of CPU consumption.</td>
+            </tr>
+            <tr>
+              <td><code>t</code></td>
+              <td>Sort by Title</td>
+              <td>Alphabetical sort by web page title.</td>
+            </tr>
+            <tr>
+              <td><code>/</code></td>
+              <td>Search / Filter</td>
+              <td>Live fuzzy filter by tab title or URL (Esc/Enter to return).</td>
+            </tr>
+            <tr>
+              <td><code>x</code></td>
+              <td>Close Tab</td>
+              <td>Close the highlighted tab directly from the TUI.</td>
+            </tr>
+            <tr>
+              <td><code>r</code></td>
+              <td>Refresh</td>
+              <td>Query Chrome for newly opened tabs and fresh metrics.</td>
+            </tr>
+            <tr>
+              <td><code>q</code></td>
+              <td>Quit</td>
+              <td>Exit application.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DevSecOps Compliance Table -->
+    <section id="security">
+      <div class="section-header">
+        <h2 class="section-title">Enterprise DevSecOps Standards</h2>
+        <p class="section-subtitle">Zero-trust supply chain security, continuous compliance, and static/dynamic testing.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Security Layer</th>
+              <th>Tool / Mechanism</th>
+              <th>Protection Benefit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Static Analysis (SAST)</strong></td>
+              <td>GitHub CodeQL + Semgrep OSS</td>
+              <td>Semantic taint tracking & vulnerability detection on every PR.</td>
+            </tr>
+            <tr>
+              <td><strong>Dynamic Analysis (DAST)</strong></td>
+              <td>OWASP ZAP Baseline Scan</td>
+              <td>Automated security scan against daemon readiness & health endpoints.</td>
+            </tr>
+            <tr>
+              <td><strong>Supply Chain Security</strong></td>
+              <td>OpenSSF Scorecard + Cosign</td>
+              <td>Cryptographic keyless signing and SLSA supply-chain audits.</td>
+            </tr>
+            <tr>
+              <td><strong>Secret Leak Protection</strong></td>
+              <td>Pre-commit hooks (Gitleaks, hygiene)</td>
+              <td>Prevents credential leakage into repository history.</td>
+            </tr>
+            <tr>
+              <td><strong>SRE Quality Gates</strong></td>
+              <td><code>gh-stats</code> PR blast-radius auditing</td>
+              <td>Automated DORA metrics and risk-budget evaluations on pull requests.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Released under the <a href="https://github.com/smford/chrome-tab-cleaner/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>. Maintained by <a href="https://github.com/smford" target="_blank" rel="noopener">@smford</a>.</p>
+      <p style="margin-top: 8px;">Documentation powered by GitHub Pages with privacy-aware GA4 analytics.</p>
+    </div>
+  </footer>
+
+  <script>
+    function switchTab(evt, tabId) {
+      document.querySelectorAll('.install-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.install-tab-content').forEach(content => content.classList.remove('active'));
+      evt.currentTarget.classList.add('active');
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+    }
+
+    // Copy command helper
+    document.querySelectorAll('.btn-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-clipboard-text');
+        if (text) {
+          navigator.clipboard.writeText(text).then(() => {
+            const original = btn.innerText;
+            btn.innerText = 'Copied!';
+            btn.style.color = '#3fb950';
+            setTimeout(() => {
+              btn.innerText = original;
+              btn.style.color = '';
+            }, 2000);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
