@@ -9,6 +9,9 @@
 
 > **Tame Chrome Tab Sprawl:** A high-performance terminal user interface (TUI) for macOS to quickly inspect all open Google Chrome tabs across windows and profiles, spot tabs consuming excessive Memory or CPU, live-search and filter, and instantly bring tabs to the front or close them.
 
+> [!IMPORTANT]
+> **macOS Only:** `chrome-tab-cleaner` relies on native macOS Apple Events (AppleScript) and Accessibility APIs (`AXRaise`, System Events) to enumerate tabs, read Chrome's Task Manager, raise windows, and close tabs without requiring external browser extensions. It is not compatible with Linux or Windows.
+
 Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for live interactive documentation and installation guides.
 
 ---
@@ -60,9 +63,9 @@ Switch to the target tab and raise its window in macOS, or close tabs directly f
 brew install smford/tap/chrome-tab-cleaner
 ```
 
-### Pre-built Binaries
+### Pre-built Binaries (macOS / OS X)
 
-Download pre-compiled hermetic binaries for macOS (Apple Silicon & Intel) and Linux from the [GitHub Releases](https://github.com/smford/chrome-tab-cleaner/releases/latest) page.
+Download pre-compiled hermetic binaries for macOS (Apple Silicon & Intel) from the [GitHub Releases](https://github.com/smford/chrome-tab-cleaner/releases/latest) page.
 
 ```bash
 # macOS Apple Silicon (M1/M2/M3/M4)
@@ -98,11 +101,13 @@ go install github.com/smford/chrome-tab-cleaner/cmd/chrome-tab-cleaner@latest
 
 ---
 
-## Requirements
+## System Requirements & OS Compatibility
 
-- **macOS** (Apple Silicon or Intel)
-- **Google Chrome**
-- **Terminal permissions**: Ensure your Terminal or iTerm2 has Accessibility permissions under **System Settings > Privacy & Security > Accessibility** so it can interact with Chrome via Apple Events.
+- **Operating System**: **macOS / OS X only** (macOS 12 Monterey, 13 Ventura, 14 Sonoma, 15 Sequoia+; Apple Silicon & Intel architectures). *Linux and Windows are not supported.*
+- **Browser**: **Google Chrome** (running with at least one window open).
+- **Permissions**: Ensure your terminal emulator (Terminal.app, iTerm2, Alacritty, Ghostty, Kitty) has Accessibility permissions under:
+  **System Settings > Privacy & Security > Accessibility**
+  This allows the tool to query Chrome's Task Manager table and raise windows (`AXRaise`).
 
 ---
 

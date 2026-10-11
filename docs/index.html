@@ -374,6 +374,7 @@
         <a href="#showcase" class="nav-link">Showcase</a>
         <a href="#install" class="nav-link">Installation</a>
         <a href="#keybindings" class="nav-link">Keybindings</a>
+        <a href="#requirements" class="nav-link">Requirements</a>
         <a href="#security" class="nav-link">DevSecOps</a>
         <a href="https://github.com/smford/chrome-tab-cleaner" class="nav-btn" target="_blank" rel="noopener">GitHub</a>
       </div>
@@ -391,6 +392,11 @@
       </div>
       <h1>Tame Your Chrome Tabs<br>& Reclaim System Memory</h1>
       <p>An easy, fast way to clean up Chrome browser tabs: find tabs draining RAM or CPU, discover duplicate URLs, live-search across windows, and focus or close tabs instantly from your terminal.</p>
+
+      <div style="max-width: 680px; margin: 0 auto 1.5rem; background: rgba(56, 139, 253, 0.1); border: 1px solid rgba(56, 139, 253, 0.35); border-radius: 8px; padding: 0.75rem 1.25rem; font-size: 0.9rem; color: #a5d6ff; text-align: left; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.25rem;">🍎</span>
+        <span><strong>macOS / OS X Only:</strong> Uses native Apple Events and macOS Accessibility APIs for zero-overhead tab control without browser extensions. <em>Linux and Windows are not supported.</em></span>
+      </div>
 
       <div class="quick-install-box">
         <code>brew install smford/tap/chrome-tab-cleaner</code>
@@ -489,7 +495,7 @@ brew install chrome-tab-cleaner</code></pre>
         </div>
 
         <div id="tab-binary" class="install-tab-content">
-          <p>Download pre-compiled hermetic binaries for macOS and Linux:</p>
+          <p>Download pre-compiled hermetic binaries for macOS (Apple Silicon & Intel):</p>
           <pre><code># macOS Apple Silicon (M1/M2/M3/M4)
 curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_arm64.tar.gz" | tar -xz
 sudo mv chrome-tab-cleaner /usr/local/bin/
@@ -598,6 +604,29 @@ sudo mv chrome-tab-cleaner /usr/local/bin/</code></pre>
             </tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- System Requirements Section -->
+    <section id="requirements">
+      <div class="section-header">
+        <h2 class="section-title">System Requirements & Compatibility</h2>
+        <p class="section-subtitle">Important hardware, OS, and permission prerequisites.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🍏 macOS / OS X Only</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Engineered exclusively for macOS (macOS 12 Monterey through 15 Sequoia+ on Apple Silicon M1-M4 and Intel). <strong>Linux and Windows are not supported</strong> due to dependency on macOS Apple Events.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🌐 Google Chrome</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Requires Google Chrome to be installed and running with at least one active window or tab.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🔐 Accessibility Permissions</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Your terminal emulator requires permission under <code>System Settings &gt; Privacy &amp; Security &gt; Accessibility</code> to read Chrome's Task Manager and raise windows.</p>
+        </div>
       </div>
     </section>
 
