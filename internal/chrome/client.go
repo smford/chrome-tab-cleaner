@@ -111,7 +111,7 @@ tell application "System Events"
 				exit repeat
 			end if
 		end repeat
-		
+
 		if not hasTM then
 			set frontmost to true
 			keystroke (ASCII character 27) using {shift down}

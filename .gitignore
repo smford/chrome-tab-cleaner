@@ -1,3 +1,17 @@
+# Binaries and build artifacts
+/chrome-tab-cleaner
 bin/
-*.exe
+dist/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Test and scan outputs
 *.test
+*.out
+*.sarif
+
+# Local notes and drafts
+pr.txt
+pr*.txt

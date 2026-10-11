@@ -23,13 +23,13 @@ const (
 
 // App manages the terminal user interface.
 type App struct {
-	client     *chrome.Client
-	app        *tview.Application
-	table      *tview.Table
-	filter     *tview.InputField
-	statusBar  *tview.TextView
-	headerBar  *tview.TextView
-	flex       *tview.Flex
+	client    *chrome.Client
+	app       *tview.Application
+	table     *tview.Table
+	filter    *tview.InputField
+	statusBar *tview.TextView
+	headerBar *tview.TextView
+	flex      *tview.Flex
 
 	tabs       []chrome.Tab
 	filtered   []chrome.Tab
@@ -43,13 +43,13 @@ type App struct {
 // NewApp initializes the TUI application.
 func NewApp(client *chrome.Client) *App {
 	a := &App{
-		client:   client,
-		app:      tview.NewApplication(),
-		table:    tview.NewTable(),
-		filter:   tview.NewInputField(),
+		client:    client,
+		app:       tview.NewApplication(),
+		table:     tview.NewTable(),
+		filter:    tview.NewInputField(),
 		statusBar: tview.NewTextView(),
 		headerBar: tview.NewTextView(),
-		sortMode: SortMemory,
+		sortMode:  SortMemory,
 	}
 
 	a.setupUI()
