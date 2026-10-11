@@ -1,4 +1,4 @@
-# top-tab-cleaner
+# chrome-tab-cleaner
 
 A high-performance terminal user interface (TUI) for macOS to inspect Google Chrome tabs sorted by Memory and CPU usage, and instantly bring selected tabs to the front and focus them.
 
@@ -32,8 +32,8 @@ A high-performance terminal user interface (TUI) for macOS to inspect Google Chr
 
 ```bash
 # Build binary
-go build -o bin/top-tab-cleaner ./cmd/top-tab-cleaner
+go build -o bin/chrome-tab-cleaner ./cmd/chrome-tab-cleaner
 
 # Run
-./bin/top-tab-cleaner
+./bin/chrome-tab-cleaner
 ```

@@ -10,7 +10,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"github.com/smford/top-tab-cleaner/internal/chrome"
+	"github.com/smford/chrome-tab-cleaner/internal/chrome"
 )
 
 type SortMode int

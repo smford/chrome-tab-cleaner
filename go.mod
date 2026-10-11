@@ -1,4 +1,4 @@
-module github.com/smford/top-tab-cleaner
+module github.com/smford/chrome-tab-cleaner
 
 go 1.24.3
 

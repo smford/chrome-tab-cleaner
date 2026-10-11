@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/smford/top-tab-cleaner/internal/chrome"
-	"github.com/smford/top-tab-cleaner/internal/tui"
+	"github.com/smford/chrome-tab-cleaner/internal/chrome"
+	"github.com/smford/chrome-tab-cleaner/internal/tui"
 )
 
 func main() {
