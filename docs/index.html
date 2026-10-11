@@ -398,9 +398,48 @@
 
       <div class="hero-actions">
         <a href="#install" class="btn-primary">Installation</a>
-        <a href="#features" class="btn-secondary">Explore Features</a>
+        <a href="#showcase" class="btn-secondary">Explore Showcase</a>
+      </div>
+
+      <!-- Featured Hero Visual -->
+      <div style="margin: 3.5rem auto 1rem; max-width: 1050px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7));">
+        <img src="images/01-tui-overview-memory.svg" alt="chrome-tab-cleaner terminal UI overview" style="width: 100%; height: auto; border-radius: 8px; display: block;" loading="eager">
       </div>
     </header>
+
+    <!-- Visual Showcase Gallery -->
+    <section id="showcase">
+      <div class="section-header">
+        <h2 class="section-title">Visual Showcase</h2>
+        <p class="section-subtitle">High-resolution terminal screenshots illustrating core workflows and inspection modes.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="padding: 1.25rem;">
+          <h3 style="margin-bottom:0.5rem;">📊 Live Memory Footprint Sorting</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Correlates all open tabs across windows with live Chrome Task Manager memory usage.</p>
+          <img src="images/01-tui-overview-memory.svg" alt="Memory sort view" style="width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        </div>
+
+        <div class="card" style="padding: 1.25rem;">
+          <h3 style="margin-bottom:0.5rem;">🔍 Interactive Fuzzy Filter</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Press <code>/</code> to filter hundreds of tabs instantly by title or destination URL.</p>
+          <img src="images/02-search-filter.svg" alt="Live search filter view" style="width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        </div>
+
+        <div class="card" style="padding: 1.25rem;">
+          <h3 style="margin-bottom:0.5rem;">⚡ CPU Spikes & Renderer Detection</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Sort with <code>c</code> to instantly isolate background runaway scripts or WebGL loads.</p>
+          <img src="images/03-cpu-sort-alert.svg" alt="CPU intensive sort view" style="width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        </div>
+
+        <div class="card" style="padding: 1.25rem;">
+          <h3 style="margin-bottom:0.5rem;">🎯 Direct Window Focus & Tab Termination</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Press <code>Enter</code> to raise the tab window via AXRaise, or <code>x</code> to kill the tab immediately.</p>
+          <img src="images/04-close-action.svg" alt="Tab close and focus action view" style="width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        </div>
+      </div>
+    </section>
 
     <!-- Installation Methods -->
     <section id="install">

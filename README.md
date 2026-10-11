@@ -9,7 +9,33 @@
 
 A high-performance terminal user interface (TUI) for macOS to inspect Google Chrome tabs sorted by Memory and CPU usage, and instantly bring selected tabs to the front and focus them.
 
-Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for documentation and interactive installation instructions.
+Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for live documentation and interactive installation instructions.
+
+---
+
+## Visual Showcase
+
+### 1. Memory Sort & Resource Overview
+Inspect Chrome tabs across all profiles and windows, correlated with live Task Manager metrics:
+
+![Memory Sort Overview](docs/images/01-tui-overview-memory.svg)
+
+### 2. Live Search & Title / URL Filtering (`/`)
+Instant interactive search filtering across tab titles and URLs as you type:
+
+![Live Search and Filtering](docs/images/02-search-filter.svg)
+
+### 3. CPU Intensive Tabs & Runaway Renderer Alerts (`c`)
+Sort by CPU usage (`c`) to immediately spotlight background tabs draining battery or processor resources:
+
+![CPU Sort and Alerts](docs/images/03-cpu-sort-alert.svg)
+
+### 4. Direct Focus (`Enter`) & Instant Tab Close (`x`)
+Switch directly to a tab and raise its window in macOS, or terminate memory-heavy tabs directly from the terminal:
+
+![Instant Close Action](docs/images/04-close-action.svg)
+
+---
 
 ## Installation
 
