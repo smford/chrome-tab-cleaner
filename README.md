@@ -7,31 +7,46 @@
 [![Homebrew](https://img.shields.io/badge/homebrew-smford%2Ftap-orange.svg?logo=homebrew)](https://github.com/smford/homebrew-tap)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance terminal user interface (TUI) for macOS to inspect Google Chrome tabs sorted by Memory and CPU usage, and instantly bring selected tabs to the front and focus them.
+> **Tame Chrome Tab Sprawl:** A high-performance terminal user interface (TUI) for macOS to quickly inspect all open Google Chrome tabs across windows and profiles, spot tabs consuming excessive Memory or CPU, live-search and filter, and instantly bring tabs to the front or close them.
 
-Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for live documentation and interactive installation instructions.
+Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for live interactive documentation and installation guides.
+
+---
+
+## The Problem It Solves
+
+Modern web workflows inevitably lead to **tab sprawl**: dozens (or hundreds) of tabs scattered across multiple windows, eating gigabytes of system RAM, draining laptop batteries, and making it nearly impossible to find what you were working on.
+
+While Chrome includes a built-in Task Manager, it is buried behind menus and disconnected from everyday navigation. Finding which specific tab is running a heavy script or where a duplicate URL is hiding takes excessive effort.
+
+**`chrome-tab-cleaner` gives you a focused, keyboard-driven command center right in your terminal:**
+- **Pinpoint Resource Hogs**: Automatically correlates tab titles and URLs with live Chrome Task Manager memory footprints (MB/GB) and CPU percentages.
+- **Search & Find in Milliseconds**: Type `/` to live fuzzy-filter across hundreds of tab titles and URLs simultaneously.
+- **Effortless Tab Navigation & Focus**: Highlight any tab and press `Enter` to switch directly to it and bring its parent window to the front.
+- **Reclaim Memory Instantly**: Hit `x` to terminate resource-heavy or duplicate tabs directly without hunting down windows.
+- **Lightning Fast**: Discovers and indexes 400+ tabs across profiles in ~0.8s using batch Apple Events.
 
 ---
 
 ## Visual Showcase
 
 ### 1. Memory Sort & Resource Overview
-Inspect Chrome tabs across all profiles and windows, correlated with live Task Manager metrics:
+Inspect all open tabs across profiles, sorted by memory footprint (`m`):
 
 ![Memory Sort Overview](docs/images/01-tui-overview-memory.svg)
 
 ### 2. Live Search & Title / URL Filtering (`/`)
-Instant interactive search filtering across tab titles and URLs as you type:
+Instant interactive filtering across tab titles and destination URLs as you type:
 
 ![Live Search and Filtering](docs/images/02-search-filter.svg)
 
-### 3. CPU Intensive Tabs & Runaway Renderer Alerts (`c`)
-Sort by CPU usage (`c`) to immediately spotlight background tabs draining battery or processor resources:
+### 3. Spot CPU Spikes & Battery-Draining Tabs (`c`)
+Sort tabs by processor utilization (`c`) to immediately isolate background runaway scripts or WebGL loads:
 
 ![CPU Sort and Alerts](docs/images/03-cpu-sort-alert.svg)
 
-### 4. Direct Focus (`Enter`) & Instant Tab Close (`x`)
-Switch directly to a tab and raise its window in macOS, or terminate memory-heavy tabs directly from the terminal:
+### 4. Switch Focus (`Enter`) & Reclaim Memory (`x`)
+Switch to the target tab and raise its window in macOS, or close tabs directly from the terminal:
 
 ![Instant Close Action](docs/images/04-close-action.svg)
 
@@ -50,7 +65,7 @@ brew install smford/tap/chrome-tab-cleaner
 Download pre-compiled hermetic binaries for macOS (Apple Silicon & Intel) and Linux from the [GitHub Releases](https://github.com/smford/chrome-tab-cleaner/releases/latest) page.
 
 ```bash
-# macOS Apple Silicon
+# macOS Apple Silicon (M1/M2/M3/M4)
 curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_arm64.tar.gz" | tar -xz
 sudo mv chrome-tab-cleaner /usr/local/bin/
 
@@ -65,42 +80,45 @@ sudo mv chrome-tab-cleaner /usr/local/bin/
 go install github.com/smford/chrome-tab-cleaner/cmd/chrome-tab-cleaner@latest
 ```
 
-## Features
+---
 
-- **Resource Monitoring**: Correlates Chrome tab metadata with live Chrome Task Manager metrics (Memory footprint, CPU %, Process ID).
-- **Interactive TUI**:
-  - `↑` / `↓` (or `k` / `j`): Navigate tabs.
-  - `Enter`: Bring selected tab and its parent window to the front and focus it.
-  - `m`: Sort by Memory (highest first).
-  - `c`: Sort by CPU (highest first).
-  - `t`: Sort alphabetically by Title.
-  - `/`: Search / live filter by title or URL (press `Enter` or `Esc` to return to table).
-  - `x`: Close the selected tab directly from the TUI.
-  - `r`: Refresh tabs and resource metrics.
-  - `q`: Quit.
+## Keyboard Shortcuts
 
-## Architecture
+| Key | Action | Description |
+|:---:|:---|:---|
+| `↑` / `↓` or `k` / `j` | **Navigate** | Move cursor up and down through the tab list |
+| `Enter` | **Focus Tab** | Switch to the tab and raise its parent window via native macOS APIs |
+| `m` | **Sort Memory** | Sort all tabs in descending order of memory footprint (MB/GB) |
+| `c` | **Sort CPU** | Sort all tabs in descending order of live CPU percentage |
+| `t` | **Sort Title** | Sort tabs alphabetically by web page title |
+| `/` | **Search / Filter** | Live fuzzy filter by title or URL (press `Enter` or `Esc` to return to table) |
+| `x` | **Close Tab** | Terminate the highlighted tab directly and reclaim memory |
+| `r` | **Refresh** | Re-scan Chrome windows and pull fresh Task Manager metrics |
+| `q` | **Quit** | Exit `chrome-tab-cleaner` |
 
-1. **Tab Enumeration**: Discovers all open windows and tabs across profiles via macOS AppleScript in a single batch query (~0.8s for 400+ tabs).
-2. **Metrics Ingestion**: Reads process metrics from Chrome's Task Manager via macOS Accessibility UI APIs.
-3. **Tab Focus**: Switches directly to the target tab and raises its window using Chrome's native window/tab indexing API.
+---
 
 ## Requirements
 
-- macOS
-- Google Chrome
-- Terminal permissions: Ensure your Terminal / iTerm has Accessibility permissions in **System Settings > Privacy & Security > Accessibility** so it can interact with Chrome via Apple Events.
+- **macOS** (Apple Silicon or Intel)
+- **Google Chrome**
+- **Terminal permissions**: Ensure your Terminal or iTerm2 has Accessibility permissions under **System Settings > Privacy & Security > Accessibility** so it can interact with Chrome via Apple Events.
 
-## Building & Running Locally
+---
+
+## Building & Developing Locally
 
 ```bash
-# Build binary
+# Compile binary
 make build
 
-# Run application
+# Launch application
 ./bin/chrome-tab-cleaner
 
 # Run tests and linter
 make test
 make lint
+
+# Run pre-commit hooks
+make pre-commit
 ```

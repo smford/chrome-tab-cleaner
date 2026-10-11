@@ -370,8 +370,9 @@
         <span class="brand-badge" id="release-version">v0.1.0</span>
       </a>
       <div class="nav-links">
+        <a href="#problem" class="nav-link">Why</a>
+        <a href="#showcase" class="nav-link">Showcase</a>
         <a href="#install" class="nav-link">Installation</a>
-        <a href="#features" class="nav-link">Features</a>
         <a href="#keybindings" class="nav-link">Keybindings</a>
         <a href="#security" class="nav-link">DevSecOps</a>
         <a href="https://github.com/smford/chrome-tab-cleaner" class="nav-btn" target="_blank" rel="noopener">GitHub</a>
@@ -388,8 +389,8 @@
           <span>Latest Release: <strong id="release-version-number">0.1.0</strong> Available Now →</span>
         </a>
       </div>
-      <h1>Inspect & Tame<br>Chrome Tab Sprawl</h1>
-      <p>A high-performance terminal user interface for macOS that correlates live Chrome Task Manager memory footprints and CPU percentages with browser tabs, enabling instant navigation, focus switching, and tab closing.</p>
+      <h1>Tame Your Chrome Tabs<br>& Reclaim System Memory</h1>
+      <p>An easy, fast way to clean up Chrome browser tabs: find tabs draining RAM or CPU, discover duplicate URLs, live-search across windows, and focus or close tabs instantly from your terminal.</p>
 
       <div class="quick-install-box">
         <code>brew install smford/tap/chrome-tab-cleaner</code>
@@ -398,14 +399,38 @@
 
       <div class="hero-actions">
         <a href="#install" class="btn-primary">Installation</a>
-        <a href="#showcase" class="btn-secondary">Explore Showcase</a>
+        <a href="#problem" class="btn-secondary">Why It Matters</a>
+        <a href="#showcase" class="btn-secondary">View Showcase</a>
       </div>
 
       <!-- Featured Hero Visual -->
-      <div style="margin: 3.5rem auto 1rem; max-width: 1050px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7));">
+      <div style="margin: 3.5rem auto 1rem; max-width: 1200px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7));">
         <img src="images/01-tui-overview-memory.svg" alt="chrome-tab-cleaner terminal UI overview" style="width: 100%; height: auto; border-radius: 8px; display: block;" loading="eager">
       </div>
     </header>
+
+    <!-- The Problem It Solves -->
+    <section id="problem">
+      <div class="section-header">
+        <h2 class="section-title">Why Clean Up Chrome Tabs?</h2>
+        <p class="section-subtitle">Dozens of open tabs quietly consume gigabytes of memory, spike processor loads, and slow your machine down.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🚨 Memory & CPU Drain</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Web apps, video streams, and complex dashboards run background scripts that accumulate gigabytes of RAM. Finding which tab is responsible inside Chrome is tedious.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">🔍 Lost Across Windows</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Tabs end up scattered across multiple windows, spaces, and profiles. Finding that one documentation page or GitHub PR takes endless clicking.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:0.75rem;">⚡ Instant Terminal Action</h3>
+          <p style="color:var(--text-muted); font-size:0.95rem;">Sort by Memory or CPU in 1 keypress, search across hundreds of tabs in milliseconds, hit <code>Enter</code> to raise the tab window, or hit <code>x</code> to kill the tab immediately.</p>
+        </div>
+      </div>
+    </section>
 
     <!-- Visual Showcase Gallery -->
     <section id="showcase">
