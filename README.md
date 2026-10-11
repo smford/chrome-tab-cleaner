@@ -1,6 +1,43 @@
 # chrome-tab-cleaner
 
+[![CI](https://github.com/smford/chrome-tab-cleaner/actions/workflows/ci.yml/badge.svg)](https://github.com/smford/chrome-tab-cleaner/actions/workflows/ci.yml)
+[![SAST](https://github.com/smford/chrome-tab-cleaner/actions/workflows/sast.yml/badge.svg)](https://github.com/smford/chrome-tab-cleaner/actions/workflows/sast.yml)
+[![DAST](https://github.com/smford/chrome-tab-cleaner/actions/workflows/dast.yml/badge.svg)](https://github.com/smford/chrome-tab-cleaner/actions/workflows/dast.yml)
+[![Release](https://img.shields.io/github/v/release/smford/chrome-tab-cleaner?color=blue&logo=github)](https://github.com/smford/chrome-tab-cleaner/releases/latest)
+[![Homebrew](https://img.shields.io/badge/homebrew-smford%2Ftap-orange.svg?logo=homebrew)](https://github.com/smford/homebrew-tap)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A high-performance terminal user interface (TUI) for macOS to inspect Google Chrome tabs sorted by Memory and CPU usage, and instantly bring selected tabs to the front and focus them.
+
+Visit the [GitHub Pages Site](https://smford.github.io/chrome-tab-cleaner/) for documentation and interactive installation instructions.
+
+## Installation
+
+### Homebrew (Recommended)
+
+```bash
+brew install smford/tap/chrome-tab-cleaner
+```
+
+### Pre-built Binaries
+
+Download pre-compiled hermetic binaries for macOS (Apple Silicon & Intel) and Linux from the [GitHub Releases](https://github.com/smford/chrome-tab-cleaner/releases/latest) page.
+
+```bash
+# macOS Apple Silicon
+curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_arm64.tar.gz" | tar -xz
+sudo mv chrome-tab-cleaner /usr/local/bin/
+
+# macOS Intel
+curl -sSL "https://github.com/smford/chrome-tab-cleaner/releases/download/v0.1.0/chrome-tab-cleaner_0.1.0_darwin_amd64.tar.gz" | tar -xz
+sudo mv chrome-tab-cleaner /usr/local/bin/
+```
+
+### Go Toolchain
+
+```bash
+go install github.com/smford/chrome-tab-cleaner/cmd/chrome-tab-cleaner@latest
+```
 
 ## Features
 
@@ -28,12 +65,16 @@ A high-performance terminal user interface (TUI) for macOS to inspect Google Chr
 - Google Chrome
 - Terminal permissions: Ensure your Terminal / iTerm has Accessibility permissions in **System Settings > Privacy & Security > Accessibility** so it can interact with Chrome via Apple Events.
 
-## Building & Running
+## Building & Running Locally
 
 ```bash
 # Build binary
-go build -o bin/chrome-tab-cleaner ./cmd/chrome-tab-cleaner
+make build
 
-# Run
+# Run application
 ./bin/chrome-tab-cleaner
+
+# Run tests and linter
+make test
+make lint
 ```
