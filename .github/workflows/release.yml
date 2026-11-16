@@ -8,6 +8,7 @@ on:
       - 'v*.*.*'
     paths:
       - 'cmd/**'
+      - 'internal/**'
       - 'go.mod'
       - 'go.sum'
       - 'Dockerfile'
@@ -77,7 +78,7 @@ jobs:
 
           # Verify that application code actually changed since latest tag (unless manual dispatch)
           if [ "$LATEST_TAG" != "v0.0.0" ] && [ "$EVENT_NAME" != "workflow_dispatch" ]; then
-            APP_DIFF=$(git diff --name-only "$LATEST_TAG"..HEAD -- 'cmd/**' 'go.mod' 'go.sum' 'Dockerfile' '.goreleaser.yaml')
+            APP_DIFF=$(git diff --name-only "$LATEST_TAG"..HEAD -- 'cmd/**' 'internal/**' 'go.mod' 'go.sum' 'Dockerfile' '.goreleaser.yaml')
             if [ -z "$APP_DIFF" ]; then
               echo "No application code changes detected since $LATEST_TAG. Skipping release."
               echo "skipped=true" >> "$GITHUB_OUTPUT"

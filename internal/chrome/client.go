@@ -21,6 +21,8 @@ type Tab struct {
 	CPU       float64 // CPU percentage from Task Manager / ps
 	MemoryMB  float64 // Memory footprint in MB
 	MemoryStr string  // Human-readable memory string (e.g. "636 MB")
+	Energy    float64 // macOS Energy Impact (POWER metric from top / Activity Monitor)
+	EnergyStr string  // Human-readable energy string (e.g. "12.4" or "-")
 	IsActive  bool    // Whether it was reported active in its window
 }
 
@@ -83,6 +85,7 @@ return out
 			Title:     title,
 			URL:       url,
 			MemoryStr: "-",
+			EnergyStr: "-",
 		})
 	}
 
@@ -140,6 +143,67 @@ end tell
 	}
 
 	return parseTaskManagerOutput(string(output)), nil
+}
+
+// FetchProcessEnergy samples macOS process power metrics using top.
+// It returns a mapping of PID -> Energy Impact score.
+func (c *Client) FetchProcessEnergy(ctx context.Context) (map[int]float64, error) {
+	cmd := exec.CommandContext(ctx, "top", "-l", "2", "-s", "1", "-stats", "pid,power")
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch energy metrics via top: %w", err)
+	}
+
+	return ParseTopPowerOutput(string(output)), nil
+}
+
+// ParseTopPowerOutput parses the output from `top -stats pid,power`.
+// It targets the last iteration block to capture delta power consumption.
+func ParseTopPowerOutput(raw string) map[int]float64 {
+	results := make(map[int]float64)
+	lines := strings.Split(raw, "\n")
+
+	// Find the start index of the last "PID" / "POWER" header block
+	lastHeaderIdx := -1
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "PID") && strings.Contains(trimmed, "POWER") {
+			lastHeaderIdx = i
+		}
+	}
+
+	if lastHeaderIdx == -1 {
+		return results
+	}
+
+	for _, line := range lines[lastHeaderIdx+1:] {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "Processes:") || (strings.HasPrefix(trimmed, "PID") && strings.Contains(trimmed, "POWER")) {
+			break
+		}
+
+		parts := strings.Fields(trimmed)
+		if len(parts) < 2 {
+			continue
+		}
+
+		pid, err := strconv.Atoi(parts[0])
+		if err != nil {
+			continue
+		}
+
+		power, err := strconv.ParseFloat(parts[1], 64)
+		if err != nil {
+			continue
+		}
+
+		results[pid] = power
+	}
+
+	return results
 }
 
 var (
@@ -254,8 +318,8 @@ func isDigits(s string) bool {
 	return true
 }
 
-// CorrelateTabs joins tab metadata from Chrome with Task Manager metrics.
-func CorrelateTabs(tabs []Tab, metrics []TaskManagerEntry) []Tab {
+// CorrelateTabs joins tab metadata from Chrome with Task Manager metrics and OS energy metrics.
+func CorrelateTabs(tabs []Tab, metrics []TaskManagerEntry, energyMap map[int]float64) []Tab {
 	matchedMetric := make(map[int]bool)
 
 	// First pass: exact title match
@@ -296,6 +360,23 @@ func CorrelateTabs(tabs []Tab, metrics []TaskManagerEntry) []Tab {
 				matchedMetric[j] = true
 				break
 			}
+		}
+	}
+
+	// Third pass: correlate energy impact metrics by PID
+	for i := range tabs {
+		t := &tabs[i]
+		if t.PID > 0 && energyMap != nil {
+			if p, ok := energyMap[t.PID]; ok {
+				t.Energy = p
+				t.EnergyStr = fmt.Sprintf("%.1f", p)
+			} else {
+				t.Energy = 0.0
+				t.EnergyStr = "0.0"
+			}
+		} else {
+			t.Energy = 0.0
+			t.EnergyStr = "-"
 		}
 	}
 

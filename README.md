@@ -23,7 +23,7 @@ Modern web workflows inevitably lead to **tab sprawl**: dozens (or hundreds) of 
 While Chrome includes a built-in Task Manager, it is buried behind menus and disconnected from everyday navigation. Finding which specific tab is running a heavy script or where a duplicate URL is hiding takes excessive effort.
 
 **`chrome-tab-cleaner` gives you a focused, keyboard-driven command center right in your terminal:**
-- **Pinpoint Resource Hogs**: Automatically correlates tab titles and URLs with live Chrome Task Manager memory footprints (MB/GB) and CPU percentages.
+- **Pinpoint Resource Hogs**: Automatically correlates tab titles and URLs with live Chrome Task Manager memory footprints (MB/GB), CPU percentages, and native macOS Energy Impact scores.
 - **Search & Find in Milliseconds**: Type `/` to live fuzzy-filter across hundreds of tab titles and URLs simultaneously.
 - **Effortless Tab Navigation & Focus**: Highlight any tab and press `Enter` to switch directly to it and bring its parent window to the front.
 - **Reclaim Memory Instantly**: Hit `x` to terminate resource-heavy or duplicate tabs directly without hunting down windows.
@@ -93,6 +93,7 @@ go install github.com/smford/chrome-tab-cleaner/cmd/chrome-tab-cleaner@latest
 | `Enter` | **Focus Tab** | Switch to the tab and raise its parent window via native macOS APIs |
 | `m` | **Sort Memory** | Sort all tabs in descending order of memory footprint (MB/GB) |
 | `c` | **Sort CPU** | Sort all tabs in descending order of live CPU percentage |
+| `e` | **Sort Energy** | Sort all tabs in descending order of macOS Energy Impact score |
 | `t` | **Sort Title** | Sort tabs alphabetically by web page title |
 | `/` | **Search / Filter** | Live fuzzy filter by title or URL (press `Enter` or `Esc` to return to table) |
 | `x` | **Close Tab** | Terminate the highlighted tab directly and reclaim memory |

@@ -18,6 +18,7 @@ type SortMode int
 const (
 	SortMemory SortMode = iota
 	SortCPU
+	SortEnergy
 	SortTitle
 )
 
@@ -59,7 +60,7 @@ func NewApp(client *chrome.Client) *App {
 func (a *App) setupUI() {
 	// Header bar styling
 	a.headerBar.SetDynamicColors(true).
-		SetText("[::b]CHROME TAB TOP CLEANER[::-] | [yellow]m[-]: Sort Mem | [yellow]c[-]: Sort CPU | [yellow]t[-]: Sort Title | [yellow]r[-]: Refresh | [yellow]Enter[-]: Focus | [yellow]x[-]: Close Tab | [yellow]q[-]: Quit").
+		SetText("[::b]CHROME TAB TOP CLEANER[::-] | [yellow]m[-]: Sort Mem | [yellow]c[-]: Sort CPU | [yellow]e[-]: Sort Energy | [yellow]t[-]: Sort Title | [yellow]r[-]: Refresh | [yellow]Enter[-]: Focus | [yellow]x[-]: Close Tab | [yellow]q[-]: Quit").
 		SetBackgroundColor(tcell.ColorDarkBlue)
 
 	// Filter input field
@@ -111,6 +112,9 @@ func (a *App) setupUI() {
 			case 'c', 'C':
 				a.setSort(SortCPU)
 				return nil
+			case 'e', 'E':
+				a.setSort(SortEnergy)
+				return nil
 			case 't', 'T':
 				a.setSort(SortTitle)
 				return nil
@@ -159,30 +163,51 @@ func (a *App) RefreshData() {
 		return
 	}
 	a.isLoading = true
-	a.statusMsg = "Refreshing tabs & reading Chrome Task Manager..."
+	a.statusMsg = "Refreshing tabs, Chrome Task Manager, & energy metrics..."
 	a.mu.Unlock()
 	a.updateStatusBar()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tabs, err := a.client.FetchAllTabs(ctx)
-	if err != nil {
+	var (
+		tabs      []chrome.Tab
+		tabErr    error
+		metrics   []chrome.TaskManagerEntry
+		energyMap map[int]float64
+		wg        sync.WaitGroup
+	)
+
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		tabs, tabErr = a.client.FetchAllTabs(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		metrics, _ = a.client.FetchTaskManagerMetrics(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		energyMap, _ = a.client.FetchProcessEnergy(ctx)
+	}()
+	wg.Wait()
+
+	if tabErr != nil {
 		a.mu.Lock()
 		a.isLoading = false
-		a.statusMsg = fmt.Sprintf("[red]Error fetching tabs: %v[-]", err)
+		a.statusMsg = fmt.Sprintf("[red]Error fetching tabs: %v[-]", tabErr)
 		a.mu.Unlock()
 		a.updateStatusBar()
 		return
 	}
 
-	metrics, _ := a.client.FetchTaskManagerMetrics(ctx)
-	correlated := chrome.CorrelateTabs(tabs, metrics)
+	correlated := chrome.CorrelateTabs(tabs, metrics, energyMap)
 
 	a.mu.Lock()
 	a.tabs = correlated
 	a.isLoading = false
-	a.statusMsg = fmt.Sprintf("Loaded %d tabs (%d metrics matched) at %s", len(correlated), len(metrics), time.Now().Format("15:04:05"))
+	a.statusMsg = fmt.Sprintf("Loaded %d tabs (%d metrics matched, %d power stats) at %s", len(correlated), len(metrics), len(energyMap), time.Now().Format("15:04:05"))
 	a.mu.Unlock()
 
 	a.applyFilterAndSort()
@@ -214,6 +239,10 @@ func (a *App) applyFilterAndSort() {
 		sort.SliceStable(filtered, func(i, j int) bool {
 			return filtered[i].CPU > filtered[j].CPU
 		})
+	case SortEnergy:
+		sort.SliceStable(filtered, func(i, j int) bool {
+			return filtered[i].Energy > filtered[j].Energy
+		})
 	case SortTitle:
 		sort.SliceStable(filtered, func(i, j int) bool {
 			return strings.ToLower(filtered[i].Title) < strings.ToLower(filtered[j].Title)
@@ -227,7 +256,7 @@ func (a *App) renderTable() {
 	a.table.Clear()
 
 	// Column headers
-	headers := []string{"  PID", " CPU %", "  MEMORY", " WINDOW", " TAB", " TITLE", " URL"}
+	headers := []string{"  PID", " CPU %", " ENERGY", "  MEMORY", " WINDOW", " TAB", " TITLE", " URL"}
 	for col, h := range headers {
 		cell := tview.NewTableCell(h).
 			SetTextColor(tcell.ColorYellow).
@@ -253,6 +282,13 @@ func (a *App) renderTable() {
 			cpuStr = fmt.Sprintf("%5.1f%%", t.CPU)
 		}
 
+		energyStr := t.EnergyStr
+		if energyStr == "" || energyStr == "-" {
+			energyStr = "   -  "
+		} else {
+			energyStr = fmt.Sprintf("%6s", energyStr)
+		}
+
 		memStr := t.MemoryStr
 		if memStr == "" || memStr == "-" {
 			memStr = "    -    "
@@ -267,6 +303,13 @@ func (a *App) renderTable() {
 			cpuColor = tcell.ColorOrange
 		}
 
+		energyColor := tcell.ColorWhite
+		if t.Energy >= 20.0 {
+			energyColor = tcell.ColorRed
+		} else if t.Energy >= 5.0 {
+			energyColor = tcell.ColorOrange
+		}
+
 		memColor := tcell.ColorWhite
 		if t.MemoryMB >= 500 {
 			memColor = tcell.ColorOrange
@@ -276,11 +319,12 @@ func (a *App) renderTable() {
 
 		a.table.SetCell(row, 0, tview.NewTableCell(pidStr).SetTextColor(tcell.ColorLightGray))
 		a.table.SetCell(row, 1, tview.NewTableCell(cpuStr).SetTextColor(cpuColor))
-		a.table.SetCell(row, 2, tview.NewTableCell(memStr).SetTextColor(memColor))
-		a.table.SetCell(row, 3, tview.NewTableCell(fmt.Sprintf("%7s", t.WindowID)).SetTextColor(tcell.ColorDarkGray))
-		a.table.SetCell(row, 4, tview.NewTableCell(fmt.Sprintf("%4d", t.TabIndex)).SetTextColor(tcell.ColorDarkGray))
-		a.table.SetCell(row, 5, tview.NewTableCell(" "+t.Title).SetTextColor(tcell.ColorWhite).SetExpansion(2))
-		a.table.SetCell(row, 6, tview.NewTableCell(" "+t.URL).SetTextColor(tcell.ColorCadetBlue).SetExpansion(3))
+		a.table.SetCell(row, 2, tview.NewTableCell(energyStr).SetTextColor(energyColor))
+		a.table.SetCell(row, 3, tview.NewTableCell(memStr).SetTextColor(memColor))
+		a.table.SetCell(row, 4, tview.NewTableCell(fmt.Sprintf("%7s", t.WindowID)).SetTextColor(tcell.ColorDarkGray))
+		a.table.SetCell(row, 5, tview.NewTableCell(fmt.Sprintf("%4d", t.TabIndex)).SetTextColor(tcell.ColorDarkGray))
+		a.table.SetCell(row, 6, tview.NewTableCell(" "+t.Title).SetTextColor(tcell.ColorWhite).SetExpansion(2))
+		a.table.SetCell(row, 7, tview.NewTableCell(" "+t.URL).SetTextColor(tcell.ColorCadetBlue).SetExpansion(3))
 	}
 
 	if len(tabs) > 0 {
@@ -299,6 +343,8 @@ func (a *App) updateStatusBar() {
 	switch a.sortMode {
 	case SortCPU:
 		sortStr = "CPU"
+	case SortEnergy:
+		sortStr = "Energy"
 	case SortTitle:
 		sortStr = "Title"
 	}
